@@ -3,6 +3,7 @@ package com.tecflux.controller;
 import com.tecflux.dto.company.CompanyResponseDTO;
 import com.tecflux.dto.company.CreateCompanyRequestDTO;
 import com.tecflux.dto.company.UpdateComapnyRequestDTO;
+import com.tecflux.dto.department.DepartmentResponseDTO;
 import com.tecflux.service.CompanyService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -49,5 +50,13 @@ public class CompanyController {
     public ResponseEntity<Void> deleteCompany(@PathVariable (value = "id") Long id) {
         companyService.deleteCompany(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/departments")
+    public ResponseEntity<Page<DepartmentResponseDTO>> listDepartmentsByCompany(@PathVariable(value = "id") Long companyId,
+                                                                                @RequestParam(name = "page", defaultValue = "0") Integer page,
+                                                                                @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+        var departments = companyService.listDepartmentsByCompany(companyId, page, pageSize);
+        return ResponseEntity.ok(departments);
     }
 }
