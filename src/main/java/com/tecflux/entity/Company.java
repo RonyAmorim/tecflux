@@ -45,6 +45,9 @@ public class Company {
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Department> departments;
 
+    @OneToMany(mappedBy = "company")
+    private Set<User> users;
+
     @Transient
     private String rawCnpj;
 

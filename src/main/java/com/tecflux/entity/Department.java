@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "tb_department")
@@ -37,7 +38,7 @@ public class Department {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
             name = "department_priority",
             joinColumns = @JoinColumn(name = "department_id"),
@@ -45,7 +46,7 @@ public class Department {
     )
     private List<Priority> priorities;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
             name = "department_category",
             joinColumns = @JoinColumn(name = "department_id"),
@@ -53,4 +54,6 @@ public class Department {
     )
     private List<Category> categories;
 
+    @OneToMany(mappedBy = "department")
+    private Set<User> users;
 }
