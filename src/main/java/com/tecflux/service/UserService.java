@@ -14,11 +14,14 @@ import com.tecflux.repository.UserRepository;
 import com.tecflux.util.CryptoUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -89,7 +92,6 @@ public class UserService {
         user.setRawPassword(requestDTO.password());
         user.setRawPhone(requestDTO.phone());
 
-        // Atualizar o departamento do usuário
         Department department = departmentRepository.findById(requestDTO.departmentId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, departmentNotFound));
         user.setDepartment(department);
@@ -117,8 +119,8 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    public boolean validateUser(String username, String password) {
-        Optional<User> userOptional = userRepository.findByUsername(username);
+    public boolean validateUser(String email, String password) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
 
         if (userOptional.isEmpty()) {
             return false;
@@ -127,6 +129,30 @@ public class UserService {
         User user = userOptional.get();
 
         String decryptedPassword = CryptoUtil.decrypt(user.getPassword());
-        return decryptedPassword.equals(password);
+        if(decryptedPassword.equals(password)){
+            user.setLastLogin(Instant.now());
+            userRepository.save(user);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public Page<UserResponseDTO> listUsersByDepartment(Long departmentId, int page, int size) {
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, departmentNotFound));
+
+        Pageable pageable = PageRequest.of(page, size);
+        return userRepository.findByDepartment(department, pageable)
+                .map(UserResponseDTO::fromEntity);
+    }
+
+    public Page<UserResponseDTO> listUsersByCompany(Long companyId, int page, int size) {
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, companyNotFound));
+
+        Pageable pageable = PageRequest.of(page, size);
+        return userRepository.findByCompany(company, pageable)
+                .map(UserResponseDTO::fromEntity);
     }
 }

@@ -42,4 +42,20 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/department/{departmentId}")
+    public ResponseEntity<Page<UserResponseDTO>> getUsersByDepartment(@PathVariable Long departmentId,
+                                                                      @RequestParam(defaultValue = "0") int page,
+                                                                      @RequestParam(defaultValue = "10") int size) {
+        Page<UserResponseDTO> users = userService.listUsersByDepartment(departmentId, page, size);
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/company/{companyId}")
+    public ResponseEntity<Page<UserResponseDTO>> getUsersByCompany(@PathVariable Long companyId,
+                                                                   @RequestParam(defaultValue = "0") int page,
+                                                                   @RequestParam(defaultValue = "10") int size) {
+        Page<UserResponseDTO> users = userService.listUsersByCompany(companyId, page, size);
+        return ResponseEntity.ok(users);
+    }
 }

@@ -1,6 +1,6 @@
 package com.tecflux.dto.user;
 
 public record LoginRequestDTO(
-        String username,
+        String email,
         String password
 ) {}
