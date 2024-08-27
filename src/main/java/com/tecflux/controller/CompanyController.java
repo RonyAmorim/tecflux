@@ -3,7 +3,6 @@ package com.tecflux.controller;
 import com.tecflux.dto.company.CompanyResponseDTO;
 import com.tecflux.dto.company.CreateCompanyRequestDTO;
 import com.tecflux.dto.company.UpdateComapnyRequestDTO;
-import com.tecflux.dto.department.DepartmentResponseDTO;
 import com.tecflux.service.CompanyService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -21,42 +20,40 @@ public class CompanyController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createCompany (@RequestBody CreateCompanyRequestDTO requestDTO) {
-        companyService.createCompany(requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<CompanyResponseDTO> createCompany(@RequestBody CreateCompanyRequestDTO requestDTO) {
+        CompanyResponseDTO responseDTO = companyService.createCompany(requestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateCompany(@PathVariable (value = "id") Long id,
-                                              @RequestBody UpdateComapnyRequestDTO requestDTO) {
-        companyService.updateCompany(id, requestDTO);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<CompanyResponseDTO> updateCompany(@PathVariable(value = "id") Long id,
+                                                            @RequestBody UpdateComapnyRequestDTO requestDTO) {
+        CompanyResponseDTO responseDTO = companyService.updateCompany(id, requestDTO);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @GetMapping
-    public ResponseEntity<Page<CompanyResponseDTO>> listCompanies(@RequestParam(name = "page", defaultValue = "0")Integer page,
-                                                                  @RequestParam(name = "pageSize", defaultValue = "10")Integer pageSize) {
+    public ResponseEntity<Page<CompanyResponseDTO>> listCompanies(@RequestParam(name = "page", defaultValue = "0") Integer page,
+                                                                  @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
         var companies = companyService.listCompanies(page, pageSize);
         return ResponseEntity.ok(companies);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CompanyResponseDTO> findById(@PathVariable (value = "id") Long id) {
+    public ResponseEntity<CompanyResponseDTO> findById(@PathVariable(value = "id") Long id) {
         var company = companyService.findById(id);
+        return ResponseEntity.ok(CompanyResponseDTO.fromEntity(company));
+    }
+
+    @GetMapping("/cnpj/{cnpj}")
+    public ResponseEntity<CompanyResponseDTO> findByCnpj(@PathVariable(value = "cnpj") String cnpj) {
+        var company = companyService.findByCnpj(cnpj);
         return ResponseEntity.ok(company);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCompany(@PathVariable (value = "id") Long id) {
-        companyService.deleteCompany(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/{id}/departments")
-    public ResponseEntity<Page<DepartmentResponseDTO>> listDepartmentsByCompany(@PathVariable(value = "id") Long companyId,
-                                                                                @RequestParam(name = "page", defaultValue = "0") Integer page,
-                                                                                @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
-        var departments = companyService.listDepartmentsByCompany(companyId, page, pageSize);
-        return ResponseEntity.ok(departments);
+    public ResponseEntity<CompanyResponseDTO> deleteCompany(@PathVariable(value = "id") Long id) {
+        CompanyResponseDTO responseDTO = companyService.deleteCompany(id);
+        return ResponseEntity.ok(responseDTO);
     }
 }

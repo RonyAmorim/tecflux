@@ -4,12 +4,13 @@ import com.tecflux.dto.department.CreateDepartmentRequestDTO;
 import com.tecflux.dto.department.DepartmentResponseDTO;
 import com.tecflux.dto.department.UpdateDepartmentRequestDTO;
 import com.tecflux.service.DepartmentService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/department")
+@RequestMapping("/departments")
 public class DepartmentController {
 
     private final DepartmentService departmentService;
@@ -19,27 +20,36 @@ public class DepartmentController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createDepartment(@RequestBody CreateDepartmentRequestDTO requestDTO) {
-        departmentService.createDepartment(requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<DepartmentResponseDTO> createDepartment(@RequestBody CreateDepartmentRequestDTO requestDTO) {
+        DepartmentResponseDTO responseDTO = departmentService.createDepartment(requestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> updateDepartment(@PathVariable(value = "id") Long id,
-                                                 @RequestBody UpdateDepartmentRequestDTO requestDTO) {
-        departmentService.updateDepartment(id, requestDTO);
-        return ResponseEntity.noContent().build();
+    @GetMapping
+    public ResponseEntity<Page<DepartmentResponseDTO>> listDepartments(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        Page<DepartmentResponseDTO> departments = departmentService.listDepartments(page, size);
+        return ResponseEntity.ok(departments);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DepartmentResponseDTO> findById(@PathVariable(value = "id") Long id) {
-        var department = departmentService.findById(id);
+    public ResponseEntity<DepartmentResponseDTO> getDepartmentById(@PathVariable Long id) {
+        DepartmentResponseDTO department = departmentService.getDepartmentResponseDTO(id);
         return ResponseEntity.ok(department);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<DepartmentResponseDTO> updateDepartment(
+            @PathVariable Long id,
+            @RequestBody UpdateDepartmentRequestDTO requestDTO) {
+        DepartmentResponseDTO updatedDepartment = departmentService.updateDepartment(id, requestDTO);
+        return ResponseEntity.ok(updatedDepartment);
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDepartment(@PathVariable(value = "id") Long id) {
-        departmentService.deleteDepartment(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<DepartmentResponseDTO> deleteDepartment(@PathVariable Long id) {
+        DepartmentResponseDTO deletedDepartment = departmentService.deleteDepartment(id);
+        return ResponseEntity.ok(deletedDepartment);
     }
 }

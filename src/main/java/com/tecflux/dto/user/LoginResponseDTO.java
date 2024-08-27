@@ -3,33 +3,31 @@ package com.tecflux.dto.user;
 import com.tecflux.entity.User;
 
 import java.time.Instant;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-public record UserResponseDTO(
+public record LoginResponseDTO(
+        String accessToken,
+        String tokenType,
         Long id,
         String username,
         String email,
         String phone,
         Instant createdAt,
         Instant lastLogin,
-        Long companyId,
         Long departmentId,
-        Set<String> roles
+        Long companyId
 ) {
-    public static UserResponseDTO fromEntity(User user) {
-        return new UserResponseDTO(
+    public static LoginResponseDTO fromEntity(User user, String accessToken) {
+        return new LoginResponseDTO(
+                accessToken,
+                "Bearer",
                 user.getId(),
                 user.getUsername(),
                 user.getRawEmail(),
                 user.getRawPhone(),
                 user.getCreatedAt(),
                 user.getLastLogin(),
-                user.getCompany().getId(),
-                user.getDepartment().getId(),
-                user.getRoles().stream()
-                        .map(role -> role.getName())
-                        .collect(Collectors.toSet())
+                user.getDepartment() != null ? user.getDepartment().getId() : null,
+                user.getCompany() != null ? user.getCompany().getId() : null
         );
     }
 }

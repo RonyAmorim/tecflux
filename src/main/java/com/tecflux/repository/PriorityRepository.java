@@ -9,5 +9,4 @@ import java.util.List;
 
 @Repository
 public interface PriorityRepository extends JpaRepository<Priority, Long> {
-    List<Priority> findByDepartmentsContaining(Department department);
 }

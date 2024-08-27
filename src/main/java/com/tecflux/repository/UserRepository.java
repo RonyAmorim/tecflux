@@ -13,9 +13,6 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByEmail(String email);
+    Optional<User> findByEmailHash(String emailHash);
     Optional<User> findByUsername(String username);
-
-    Page<User> findByDepartment(Department department, Pageable pageable);
-    Page<User> findByCompany(Company company, Pageable pageable);
 }

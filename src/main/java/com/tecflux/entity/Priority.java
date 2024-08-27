@@ -29,6 +29,6 @@ public class Priority {
     @Column(name = "description", length = 255)
     private String description;
 
-    @ManyToMany(mappedBy = "priorities")
-    private List<Department> departments;
+    @OneToMany(mappedBy = "priority", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Ticket> tickes;
 }

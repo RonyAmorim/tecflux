@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "tb_category")
@@ -29,6 +29,10 @@ public class Category {
     @Column(name = "description", length = 255)
     private String description;
 
-    @ManyToMany(mappedBy = "categories")
-    private List<Department> departments;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Ticket> tickets;
 }
