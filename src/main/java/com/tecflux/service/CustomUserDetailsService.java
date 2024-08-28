@@ -21,6 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
         String emailHash = CryptoUtil.hash(email);
+
         User user = userRepository.findByEmailHash(emailHash)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
 

@@ -1,5 +1,6 @@
 package com.tecflux.security;
 
+import com.tecflux.util.CryptoUtil;
 import com.tecflux.util.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -34,7 +35,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 String userId = tokenProvider.getUserIdFromJWT(jwt);
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+                String email = CryptoUtil.decrypt(userId);
+
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
