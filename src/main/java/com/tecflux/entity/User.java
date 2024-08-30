@@ -31,8 +31,8 @@ public class User implements UserDetails {
     @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "username", nullable = false, length = 100)
-    private String username;
+    @Column(name = "name", nullable = false, length = 100)
+    private String name;
 
     @Column(name = "email", nullable = false, length = 100)
     private String email;  // Armazena o email original para retorno ao frontend

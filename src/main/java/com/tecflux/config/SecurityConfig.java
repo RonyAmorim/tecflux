@@ -3,7 +3,7 @@ package com.tecflux.config;
 import com.tecflux.security.JwtAuthenticationEntryPoint;
 import com.tecflux.security.JwtAuthenticationFilter;
 import com.tecflux.service.CustomUserDetailsService;
-import com.tecflux.util.JwtTokenProvider;
+import com.tecflux.security.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

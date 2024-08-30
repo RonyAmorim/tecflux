@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public record UserResponseDTO(
         Long id,
-        String username,
+        String name,
         String email,
         String phone,
         Instant createdAt,
@@ -20,7 +20,7 @@ public record UserResponseDTO(
     public static UserResponseDTO fromEntity(User user) {
         return new UserResponseDTO(
                 user.getId(),
-                user.getUsername(),
+                user.getName(),
                 user.getRawEmail(),
                 user.getRawPhone(),
                 user.getCreatedAt(),

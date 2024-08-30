@@ -1,7 +1,6 @@
 package com.tecflux.security;
 
 import com.tecflux.util.CryptoUtil;
-import com.tecflux.util.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -3,7 +3,7 @@ package com.tecflux.dto.user;
 import java.util.Set;
 
 public record UpdateUserRequestDTO(
-        String username,
+        String name,
         String email,
         String password,
         String phone,

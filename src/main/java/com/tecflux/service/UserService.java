@@ -45,7 +45,7 @@ public class UserService {
         String emailHash = CryptoUtil.hash(requestDTO.email());
 
         User user = new User();
-        user.setUsername(requestDTO.username());
+        user.setName(requestDTO.name());
         user.setRawEmail(requestDTO.email());
         user.setEmailHash(emailHash);
 

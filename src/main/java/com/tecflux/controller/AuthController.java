@@ -5,15 +5,10 @@ import com.tecflux.dto.user.CreateUserRequestDTO;
 import com.tecflux.dto.user.LoginRequestDTO;
 import com.tecflux.dto.user.LoginResponseDTO;
 import com.tecflux.dto.user.UserResponseDTO;
-import com.tecflux.entity.Company;
-import com.tecflux.entity.Department;
 import com.tecflux.entity.User;
 import com.tecflux.repository.UserRepository;
-import com.tecflux.service.CompanyService;
-import com.tecflux.service.DepartmentService;
-import com.tecflux.service.RoleService;
 import com.tecflux.service.UserService;
-import com.tecflux.util.JwtTokenProvider;
+import com.tecflux.security.JwtTokenProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth")

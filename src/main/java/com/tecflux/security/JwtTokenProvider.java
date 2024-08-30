@@ -1,4 +1,4 @@
-package com.tecflux.util;
+package com.tecflux.security;
 
 import com.tecflux.entity.User;
 import io.jsonwebtoken.*;
