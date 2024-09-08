@@ -31,7 +31,7 @@ public class User implements UserDetails {
     @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "name", nullable = false, length = 100)
+    @Column(name = "name", nullable = true, length = 100)
     private String name;
 
     @Column(name = "email", nullable = false, length = 100)
@@ -43,7 +43,7 @@ public class User implements UserDetails {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name="phone", nullable = false)
+    @Column(name="phone")
     private String phone;
 
     @Column(name="created_at", nullable = false, updatable = false)
@@ -53,7 +53,7 @@ public class User implements UserDetails {
     @Column(name="last_login")
     private Instant lastLogin;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),

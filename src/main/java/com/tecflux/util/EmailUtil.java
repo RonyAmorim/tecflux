@@ -24,11 +24,11 @@ public class EmailUtil {
     private SpringTemplateEngine templateEngine;
 
     /**
-     * Método para enviar email.
+     * Método para enviar email genérico.
      * @param to Destinatário
      * @param subject Assunto
      * @param templateName Nome do template
-     * @param context Contexto
+     * @param context Contexto do email
      */
     public void sendEmail(String to, String subject, String templateName, Context context) {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -36,7 +36,7 @@ public class EmailUtil {
             MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true);
             messageHelper.setTo(to);
             messageHelper.setSubject(subject);
-            messageHelper.setFrom("noreply.tecflux@gmail.com"); // Campo 'from' configurado
+            messageHelper.setFrom("noreply.tecflux@gmail.com");
 
             String content = templateEngine.process(templateName, context);
             messageHelper.setText(content, true);
@@ -44,10 +44,43 @@ public class EmailUtil {
         } catch (MessagingException e) {
             throw new RuntimeException("Falha ao enviar email", e);
         } catch (TemplateInputException e) {
-            // Logar o erro e lidar com ele apropriadamente
             System.err.println("Template não encontrado: " + templateName);
             e.printStackTrace();
             throw new RuntimeException("Template não encontrado", e);
+        }
+    }
+
+    /**
+     * Método para enviar email de boas-vindas.
+     * @param to Destinatário
+     * @param nome Nome do usuário
+     * @param email Email do usuário
+     * @param senha Senha do usuário
+     * @param linkPlataforma Link para acessar a plataforma
+     */
+    public void sendWelcomeEmail(String to, String nome, String email, String senha, String linkPlataforma) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true);
+            messageHelper.setTo(to);
+            messageHelper.setSubject("Bem-vindo ao Tecflux!");
+            messageHelper.setFrom("noreply.tecflux@gmail.com");
+
+            // Criando o contexto para o Thymeleaf
+            Context context = new Context();
+            context.setVariable("nome", nome);
+            context.setVariable("email", email);
+            context.setVariable("senha", senha);
+            context.setVariable("linkPlataforma", linkPlataforma);
+
+            // Processando o template 'welcome-email'
+            String content = templateEngine.process("Boas_Vindas", context);
+            messageHelper.setText(content, true);
+
+            // Enviando o email
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Falha ao enviar email de boas-vindas", e);
         }
     }
 }

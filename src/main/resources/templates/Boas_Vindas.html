@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #293E40;
+            line-height: 1.6;
+            background-color: #F4F5F7;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #0079BF;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            margin: 5px 0 0;
+        }
+
+        .body {
+            padding: 20px;
+        }
+
+        .body h2 {
+            font-size: 1.8em;
+            color: #0079BF;
+            margin-bottom: 10px;
+        }
+
+        .body p {
+            font-size: 1.1em;
+            color: #293E40;
+            margin-bottom: 20px;
+        }
+
+        .login-info {
+            background-color: #F4F5F7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .login-info p {
+            font-size: 1.1em;
+            margin: 0;
+            color: #293E40;
+        }
+
+        .cta-button {
+            background-color: #61AFFF;
+            padding: 15px 30px;
+            border-radius: 8px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.2em;
+            display: inline-block;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background-color: #5BA4CF;
+        }
+
+        .footer {
+            background-color: #293E40;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <!-- Cabeçalho -->
+    <div class="header">
+        <h1>Bem-vindo ao Tecflux!</h1>
+        <p>Estamos felizes em tê-lo conosco.</p>
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="body">
+        <h2>Olá, <span th:text="${nome}">Nome do Usuário</span>!</h2>
+        <p>Estamos entusiasmados por você ter se juntado à nossa plataforma. Explore todos os recursos e aproveite ao máximo sua experiência conosco!</p>
+
+        <!-- Informações de Login -->
+        <div class="login-info">
+            <p>Para fazer login utilize: <br> <br>
+                email: <span th:text="${email}">email@example.com</span>
+            </p>
+            <p>senha: <strong th:text="${senha}">sua_senha</strong></p>
+        </div>
+
+        <p>Caso tenha alguma dúvida ou precise de suporte, nossa equipe estará sempre pronta para ajudar.</p>
+        <a href="#" th:href="${linkPlataforma}" class="cta-button">Comece Agora</a>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="footer">
+        <p>&copy; 2024 Tecflux. Todos os direitos reservados.</p>
+    </div>
+</div>
+</body>
+</html>
