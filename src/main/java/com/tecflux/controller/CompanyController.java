@@ -1,5 +1,6 @@
 package com.tecflux.controller;
 
+import com.tecflux.dto.ApiResponse;
 import com.tecflux.dto.company.CompanyResponseDTO;
 import com.tecflux.dto.company.CreateCompanyRequestDTO;
 import com.tecflux.dto.company.UpdateComapnyRequestDTO;
@@ -48,8 +49,14 @@ public class CompanyController {
     }
 
     @GetMapping("/cnpj/{cnpj}")
-    public ResponseEntity<CompanyResponseDTO> findByCnpj(@PathVariable(value = "cnpj") String cnpj) {
+    public ResponseEntity<?> findByCnpj(@PathVariable(value = "cnpj") String cnpj) {
         var company = companyService.findByCnpj(cnpj);
+
+        if (company != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse("CNPJ já cadastrado"));
+        }
+
         return ResponseEntity.ok(company);
     }
 
