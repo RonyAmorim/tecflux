@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/company")
@@ -48,16 +49,27 @@ public class CompanyController {
         return ResponseEntity.ok(CompanyResponseDTO.fromEntity(company));
     }
 
-    @GetMapping("/cnpj/{cnpj}")
-    public ResponseEntity<?> findByCnpj(@PathVariable(value = "cnpj") String cnpj) {
-        var company = companyService.findByCnpj(cnpj);
+    @GetMapping({"/cnpj", "/cnpj/"})
+    public ResponseEntity<?> findByCnpj(@RequestParam(value = "cnpj") String cnpj) {
+        try {
+            CompanyResponseDTO company = companyService.findByCnpj(cnpj);
 
-        if (company != null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse("CNPJ já cadastrado"));
+            if (company.id() != null) {
+                // Empresa encontrada no banco de dados
+                return ResponseEntity.ok(new ApiResponse("Empresa já cadastrada"));
+            } else {
+                // Empresa não cadastrada, mas CNPJ existe na Receita Federal
+                return ResponseEntity.ok(company);
+            }
+        } catch (ResponseStatusException e) {
+            // Trata as exceções lançadas pelo serviço
+            return ResponseEntity.status(e.getStatusCode())
+                    .body(new ApiResponse(e.getReason()));
+        } catch (Exception e) {
+            // Trata quaisquer outras exceções não previstas
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("Erro interno no servidor"));
         }
-
-        return ResponseEntity.ok(company);
     }
 
     @DeleteMapping("/{id}")
