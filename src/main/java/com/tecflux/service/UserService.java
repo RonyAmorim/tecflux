@@ -78,6 +78,7 @@ public class UserService {
         return responseDTO;
     }
 
+
     public UserResponseDTO registerUser(RegisterUserRequestDTO requestDTO) {
         Company company = null;
         Department department = null;
@@ -94,6 +95,8 @@ public class UserService {
 
         // Geração da senha do usuário
         String generatedPassword = PasswordGeneratorUtil.generateRandomPassword();
+
+        System.out.println(generatedPassword);
 
         // Criação do usuário
         User user = new User();

@@ -3,6 +3,7 @@ package com.tecflux.util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.exceptions.TemplateInputException;
@@ -58,6 +59,7 @@ public class EmailUtil {
      * @param senha Senha do usuário
      * @param linkPlataforma Link para acessar a plataforma
      */
+    @Async
     public void sendWelcomeEmail(String to, String nome, String email, String senha, String linkPlataforma) {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         try {
