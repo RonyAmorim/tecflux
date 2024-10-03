@@ -25,9 +25,6 @@ public class Ticket {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "status", nullable = false)
-    private String status;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -42,9 +39,19 @@ public class Ticket {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY )
+    @JoinColumn(name = "user_assigned_id", nullable = false)
+    private User userAssigned;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "priority_id", nullable = false)
     private Priority priority;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "status_id", nullable = false)
+    private Status status;
+
+
 
     @PrePersist
     protected void onCreate() {

@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -18,13 +19,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
         String emailHash = CryptoUtil.hash(email);
 
-        User user = userRepository.findByEmailHash(emailHash)
+        return userRepository.findByEmailHash(emailHash)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
-
-        return user;
     }
 }

@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
-@ToString
+@ToString(exclude = {"password","email","phone"})
 public class User implements UserDetails {
 
     @Id
@@ -46,14 +47,21 @@ public class User implements UserDetails {
     @Column(name="phone")
     private String phone;
 
+    @Column(name = "position")
+    private String position;
+
     @Column(name="created_at", nullable = false, updatable = false)
     @CreationTimestamp
     private Instant createdAt;
 
+    @Column(name="updated_at")
+    @UpdateTimestamp
+    private Instant updatedAt;
+
     @Column(name="last_login")
     private Instant lastLogin;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -78,9 +86,14 @@ public class User implements UserDetails {
     @PrePersist
     @PreUpdate
     public void prePersist() {
+        if (this.rawEmail == null) {
+            throw new IllegalStateException("rawEmail não pode ser nulo");
+        }
         this.emailHash = CryptoUtil.hash(this.rawEmail);
         this.email = CryptoUtil.encrypt(this.rawEmail);
-        this.phone = CryptoUtil.encrypt(this.rawPhone);
+        if (this.rawPhone != null) {
+            this.phone = CryptoUtil.encrypt(this.rawPhone);
+        }
     }
 
     @PostLoad

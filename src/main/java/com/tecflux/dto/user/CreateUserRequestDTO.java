@@ -7,6 +7,7 @@ public record CreateUserRequestDTO(
         String email,
         String password,
         String phone,
+        String position,
         Long departmentId,
         Long companyId,
         Set<String> roles

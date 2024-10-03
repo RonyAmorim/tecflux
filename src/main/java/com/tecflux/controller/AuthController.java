@@ -6,7 +6,6 @@ import com.tecflux.dto.user.LoginRequestDTO;
 import com.tecflux.dto.user.LoginResponseDTO;
 import com.tecflux.dto.user.UserResponseDTO;
 import com.tecflux.entity.User;
-import com.tecflux.repository.UserRepository;
 import com.tecflux.service.UserService;
 import com.tecflux.security.JwtTokenProvider;
 import org.springframework.http.HttpStatus;
@@ -15,11 +14,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.time.Instant;
 
 @RestController
@@ -29,18 +26,15 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
     private final UserService userService;
-    private final UserRepository userRepository;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider tokenProvider, UserService userService, UserRepository userRepository) {
+    public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider tokenProvider, UserService userService) {
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
         this.userService = userService;
-        this.userRepository = userRepository;
-
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequestDTO loginRequest) {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequestDTO loginRequest) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -56,14 +50,14 @@ public class AuthController {
 
         LoginResponseDTO loginResponse = LoginResponseDTO.fromEntity(user, jwt);
 
-        user.setLastLogin(Instant.now());
-        userRepository.save(user);
+        // Atualizar o lastLogin através do UserService
+        userService.updateLastLogin(user.getId());
 
         return ResponseEntity.ok(loginResponse);
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody CreateUserRequestDTO signUpRequest) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody CreateUserRequestDTO signUpRequest) {
         // Verifica se o email já está em uso
         if (userService.findByEmail(signUpRequest.email()).isPresent()) {
             return new ResponseEntity<>(new ApiResponse("Esse email já está em uso!"), HttpStatus.BAD_REQUEST);

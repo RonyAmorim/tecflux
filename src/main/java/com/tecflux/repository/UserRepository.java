@@ -3,6 +3,7 @@ package com.tecflux.repository;
 import com.tecflux.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,6 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+    @EntityGraph(attributePaths = "roles")
     Optional<User> findByEmailHash(String emailHash);
     Optional<User> findByName(String name);
 
@@ -17,10 +19,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Page<User> findByDepartmentId(Long departmentId, Pageable pageable);
 
-
-    Page<User> findByCompany_Id(Long companyId, Pageable pageable);
-
-    Page<User> findByDepartment_Id(Long departmentId, Pageable pageable);
-
-    Page<User> findByRoles_Name(String roleName, Pageable pageable);
+    Page<User> findByRolesName(String roleName, Pageable pageable);
 }

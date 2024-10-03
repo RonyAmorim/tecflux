@@ -1,9 +1,7 @@
 package com.tecflux.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Set;
 
@@ -12,12 +10,15 @@ import java.util.Set;
 @Setter
 @Getter
 @NoArgsConstructor
+@EqualsAndHashCode(of = "id")
+@ToString(exclude = "users")
 public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
@@ -31,6 +32,17 @@ public class Role {
     public Role(String name) {
         this.name = name;
     }
+
+    public void addUser(User user) {
+        this.users.add(user);
+        user.getRoles().add(this);
+    }
+
+    public void removeUser(User user) {
+        this.users.remove(user);
+        user.getRoles().remove(this);
+    }
+
 
     public enum Values {
         MASTER(1L, "ROLE_MASTER"),

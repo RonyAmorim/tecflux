@@ -14,7 +14,9 @@ public record LoginResponseDTO(
         String name,
         String email,
         String phone,
+        String position,
         Instant createdAt,
+        Instant updatedAt,
         Instant lastLogin,
         Set<String> roles,
         Long departmentId,
@@ -28,7 +30,9 @@ public record LoginResponseDTO(
                 user.getName(),
                 user.getRawEmail(),
                 user.getRawPhone(),
+                user.getPosition(),
                 user.getCreatedAt(),
+                user.getUpdatedAt(),
                 user.getLastLogin(),
                 user.getRoles().stream()
                         .map(role -> role.getName())

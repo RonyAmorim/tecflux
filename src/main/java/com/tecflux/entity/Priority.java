@@ -46,14 +46,9 @@ public class Priority {
 
     public enum Levels {
         CRITICO(1L, "CRITICO", "Situações que exigem atenção imediata e extrema."),
-        URGENTE(2L, "URGENTE", "Situações que requerem ação imediata."),
         ALTA(3L, "ALTA", "Situações que precisam ser resolvidas rapidamente."),
-        MEDIA_ALTA(4L, "MEDIA_ALTA", "Situações que são importantes, mas não críticas."),
         MEDIA(5L, "MEDIA", "Situações que podem aguardar um pouco mais."),
-        MEDIA_BAIXA(6L, "MEDIA_BAIXA", "Situações de importância moderada."),
-        BAIXA(7L, "BAIXA", "Situações de menor importância."),
-        MUITO_BAIXA(8L, "MUITO_BAIXA", "Situações que podem ser tratadas com baixa prioridade."),
-        INFORMACIONAL(9L, "INFORMACIONAL", "Apenas para fins de registro, sem ação necessária.");
+        BAIXA(7L, "BAIXA", "Situações de menor importância.");
 
         private final Long id;
         private final String level;

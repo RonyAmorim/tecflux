@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -64,6 +65,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(requestDTO.password()));
 
         user.setRawPhone(requestDTO.phone());
+        user.setPosition(requestDTO.position());
         user.setCompany(company);
         user.setDepartment(department);
         user.setRoles(requestDTO.roles().stream()
@@ -73,9 +75,7 @@ public class UserService {
 
         userRepository.save(user);
 
-        UserResponseDTO responseDTO = UserResponseDTO.fromEntity(userRepository.save(user));
-
-        return responseDTO;
+        return UserResponseDTO.fromEntity(userRepository.save(user));
     }
 
 
@@ -96,14 +96,13 @@ public class UserService {
         // Geração da senha do usuário
         String generatedPassword = PasswordGeneratorUtil.generateRandomPassword();
 
-        System.out.println(generatedPassword);
-
         // Criação do usuário
         User user = new User();
         user.setName(requestDTO.name());  // Use o nome real da requisição
         user.setPassword(passwordEncoder.encode(generatedPassword));
         user.setRawEmail(requestDTO.email());
         user.setRawPhone(requestDTO.phone());
+        user.setPosition(requestDTO.position());
         user.setEmailHash(emailHash);
         user.setCompany(company);
         user.setDepartment(department);
@@ -167,19 +166,19 @@ public class UserService {
 
     // Método para buscar usuários por empresa com paginação
     public Page<UserResponseDTO> getUsersByCompany(Long companyId, Pageable pageable) {
-        Page<User> users = userRepository.findByCompany_Id(companyId, pageable);
+        Page<User> users = userRepository.findByCompanyId(companyId, pageable);
         return users.map(UserResponseDTO::fromEntity);
     }
 
     // Método para buscar usuários por departamento com paginação
     public Page<UserResponseDTO> getUsersByDepartment(Long departmentId, Pageable pageable) {
-        Page<User> users = userRepository.findByDepartment_Id(departmentId, pageable);
+        Page<User> users = userRepository.findByDepartmentId(departmentId, pageable);
         return users.map(UserResponseDTO::fromEntity);
     }
 
     // Método para buscar usuários por role com paginação
     public Page<UserResponseDTO> getUsersByRole(String roleName, Pageable pageable) {
-        Page<User> users = userRepository.findByRoles_Name(roleName, pageable);
+        Page<User> users = userRepository.findByRolesName(roleName, pageable);
         return users.map(UserResponseDTO::fromEntity);
     }
 
@@ -198,11 +197,6 @@ public class UserService {
                 user.setName(userUpdateDTO.name());
             }
 
-            // Atualiza e-mail se estiver presente
-            if (userUpdateDTO.email() != null && !userUpdateDTO.email().isEmpty()) {
-                user.setRawEmail(userUpdateDTO.email());
-            }
-
             // Atualiza senha se estiver presente
             if (userUpdateDTO.password() != null && !userUpdateDTO.password().isEmpty()) {
                 user.setPassword(passwordEncoder.encode(userUpdateDTO.password()));
@@ -217,6 +211,10 @@ public class UserService {
             if (userUpdateDTO.departmentId() != null) {
                 Department department = departmentService.findById(userUpdateDTO.departmentId());
                 user.setDepartment(department);
+            }
+
+            if (userUpdateDTO.position() != null && !userUpdateDTO.position().isEmpty()) {
+                user.setPosition(userUpdateDTO.position());
             }
 
             // Atualiza roles se estiverem presentes
@@ -234,4 +232,15 @@ public class UserService {
             // Retorna os dados atualizados do usuário
             return UserResponseDTO.fromEntity(user);
         }
+
+    public void updateLastLogin(Long userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            throw new IllegalArgumentException("Usuário não encontrado para atualizar lastLogin.");
+        }
+        User user = optionalUser.get();
+        user.setLastLogin(Instant.now());
+        userRepository.save(user);
+    }
+
 }

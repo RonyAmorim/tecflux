@@ -7,6 +7,7 @@ public record UpdateUserRequestDTO(
         String email,
         String password,
         String phone,
+        String position,
         Long departmentId,
         Set<String> roles
 ) {
