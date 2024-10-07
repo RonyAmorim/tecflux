@@ -8,8 +8,8 @@ import java.util.Optional;
 
 @Repository
 public interface CompanyRepository extends JpaRepository<Company, Long> {
+
     Optional<Company> findByHashedCnpj(String hashedCnpj);
-    Optional<Company> findById(Long id);
 
     boolean existsByHashedCnpj(String hashedCnpj);
 }

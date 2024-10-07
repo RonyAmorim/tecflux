@@ -6,6 +6,7 @@ import com.tecflux.dto.department.DepartmentResponseDTO;
 import com.tecflux.dto.department.UpdateDepartmentRequestDTO;
 import com.tecflux.dto.user.UserResponseDTO;
 import com.tecflux.service.DepartmentService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class DepartmentController {
     }
 
     @PostMapping
-    public ResponseEntity<DepartmentResponseDTO> createDepartment(@RequestBody CreateDepartmentRequestDTO requestDTO) {
+    public ResponseEntity<DepartmentResponseDTO> createDepartment(@Valid @RequestBody CreateDepartmentRequestDTO requestDTO) {
         DepartmentResponseDTO responseDTO = departmentService.createDepartment(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
@@ -44,7 +45,7 @@ public class DepartmentController {
     @PutMapping("/{id}")
     public ResponseEntity<DepartmentResponseDTO> updateDepartment(
             @PathVariable Long id,
-            @RequestBody UpdateDepartmentRequestDTO requestDTO) {
+            @Valid @RequestBody UpdateDepartmentRequestDTO requestDTO) {
         DepartmentResponseDTO updatedDepartment = departmentService.updateDepartment(id, requestDTO);
         return ResponseEntity.ok(updatedDepartment);
     }
@@ -64,7 +65,7 @@ public class DepartmentController {
         return departmentService.listCategoriesByDepartmentId(departmentId, page, size);
     }
 
-    @GetMapping("/'{departmentId}/users")
+    @GetMapping("/{departmentId}/users")
     public Page<UserResponseDTO> listUsersByDepartmentId(
             @PathVariable Long departmentId,
             @RequestParam(defaultValue = "0") int page,

@@ -9,7 +9,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
-    List<Category> findByDepartment(Department department);
 
+    /**
+     * Encontra uma lista de categorias associadas a um departamento específico.
+     *
+     * @param departmentId ID do departamento.
+     * @param pageable     Informações de paginação.
+     * @return Página de categorias.
+     */
     Page<Category> findByDepartmentId(Long departmentId, Pageable pageable);
 }

@@ -28,7 +28,7 @@ public class DepartmentService {
     private final CompanyRepository companyRepository;
     private final CategoryRepository categoryRepository;
 
-    private final String departmentNotFound = "Departamento não encontrado.";
+    private final String DEPARTMENT_NOT_FOUND = "Departamento não encontrado.";
 
     public DepartmentService(DepartmentRepository departmentRepository, CompanyRepository companyRepository, UserRepository userRepository, CategoryRepository categoryRepository) {
         this.departmentRepository = departmentRepository;
@@ -41,7 +41,7 @@ public class DepartmentService {
         Company company = companyRepository.findById(requestDTO.companyId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Empresa não encontrada"));
 
-        var department = new Department();
+        Department department = new Department();
         department.setName(requestDTO.name());
         department.setDescription(requestDTO.description());
         department.setCompany(company);
@@ -58,7 +58,7 @@ public class DepartmentService {
 
     public Department findById(Long id) {
         return departmentRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, departmentNotFound));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, DEPARTMENT_NOT_FOUND));
     }
 
     public DepartmentResponseDTO getDepartmentResponseDTO(Long id) {
@@ -67,8 +67,7 @@ public class DepartmentService {
     }
 
     public DepartmentResponseDTO updateDepartment(Long id, UpdateDepartmentRequestDTO requestDTO) {
-        var department = departmentRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, departmentNotFound));
+        Department department = findById(id);
 
         department.setName(requestDTO.name());
         department.setDescription(requestDTO.description());
@@ -79,11 +78,8 @@ public class DepartmentService {
     }
 
     public DepartmentResponseDTO deleteDepartment(Long id) {
-        var department = departmentRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, departmentNotFound));
-
-        departmentRepository.deleteById(department.getId());
-
+        Department department = findById(id);
+        departmentRepository.delete(department);
         return DepartmentResponseDTO.fromEntity(department);
     }
 

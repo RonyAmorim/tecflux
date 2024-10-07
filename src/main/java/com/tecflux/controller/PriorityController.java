@@ -19,7 +19,8 @@ public class PriorityController {
     private PriorityService priorityService;
 
     @GetMapping
-    public List<PriorityResponseDTO> getAllPriorities() {
-        return priorityService.listAllPriorities();
+    public ResponseEntity<List<PriorityResponseDTO>> getAllPriorities() {
+        List<PriorityResponseDTO> priorities = priorityService.listAllPriorities();
+        return ResponseEntity.ok(priorities);
     }
 }

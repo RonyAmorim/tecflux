@@ -12,8 +12,6 @@ import java.util.Optional;
 @Repository
 public interface DepartmentRepository extends JpaRepository<Department, Long> {
 
-    Optional<Department> findById(Long id);
-
     Page<Department> findByCompany(Company company, Pageable pageable);
 
     Page<Department> findByCompanyId(Long companyId, Pageable pageable);

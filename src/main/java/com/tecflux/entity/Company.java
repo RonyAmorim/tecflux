@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -45,6 +46,10 @@ public class Company {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Department> departments;
 
@@ -63,8 +68,11 @@ public class Company {
     @PrePersist
     @PreUpdate
     public void prePersist() {
-        if (this.rawCnpj == null) {
+        if (this.rawCnpj == null || this.rawCnpj.isEmpty()) {
             throw new IllegalArgumentException("O CNPJ não pode estar vazio");
+        }
+        if (this.rawAddress == null || this.rawAddress.isEmpty()) {
+            throw new IllegalArgumentException("O endereço não pode estar vazio");
         }
         this.hashedCnpj = CryptoUtil.hash(this.rawCnpj);
         this.cnpj = CryptoUtil.encrypt(this.rawCnpj);

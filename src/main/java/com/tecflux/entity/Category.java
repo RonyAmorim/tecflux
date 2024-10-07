@@ -7,7 +7,8 @@ import lombok.Setter;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "tb_category")
@@ -15,7 +16,7 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
-@ToString
+@ToString(exclude = "tickets")
 public class Category {
 
     @Id
@@ -34,5 +35,5 @@ public class Category {
     private Department department;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Ticket> tickets;
+    private List<Ticket> tickets = new ArrayList<>();
 }

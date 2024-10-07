@@ -29,6 +29,5 @@ public class DataLoader implements CommandLineRunner {
         Arrays.stream(Priority.Levels.values())
                 .map(Priority.Levels::toPriority)
                 .forEach(priorityRepository::save);
-
     }
 }

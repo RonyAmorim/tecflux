@@ -7,8 +7,8 @@ import lombok.Setter;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "tb_priority")
@@ -31,7 +31,7 @@ public class Priority {
     private String description;
 
     @OneToMany(mappedBy = "priority", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Ticket> tickets = new HashSet<>();
+    private List<Ticket> tickets = new ArrayList<>();
 
     public Priority(Long id, String level, String description) {
         this.id = id;

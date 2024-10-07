@@ -1,9 +1,11 @@
 package com.tecflux.exception;
 
+import com.tecflux.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -21,5 +23,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CnpjAlreadyExistsException.class)
     public ResponseEntity<String> handleCnpjAlreadyExistsException(CnpjAlreadyExistsException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse> handleException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiResponse("Erro interno no servidor"));
     }
 }

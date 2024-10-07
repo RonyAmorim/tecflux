@@ -19,8 +19,12 @@ public class PriorityService {
     }
 
     public List<PriorityResponseDTO> listAllPriorities() {
-        return priorityRepository.findAll().stream()
-                .map(PriorityResponseDTO::fromEntity)
-                .collect(Collectors.toList());
+        try {
+            return priorityRepository.findAll().stream()
+                    .map(PriorityResponseDTO::fromEntity)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao listar prioridades", e);
+        }
     }
 }

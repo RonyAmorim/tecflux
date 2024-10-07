@@ -1,6 +1,5 @@
 package com.tecflux.service;
 
-import com.tecflux.dto.ApiResponse;
 import com.tecflux.dto.company.CompanyResponseDTO;
 import com.tecflux.dto.company.CreateCompanyRequestDTO;
 import com.tecflux.dto.company.ExternalCnpjResponse;
@@ -15,6 +14,8 @@ import com.tecflux.repository.CompanyRepository;
 import com.tecflux.repository.DepartmentRepository;
 import com.tecflux.repository.UserRepository;
 import com.tecflux.util.CryptoUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +31,8 @@ import java.util.Optional;
 
 @Service
 public class CompanyService {
+
+    private static final Logger logger = LoggerFactory.getLogger(CompanyService.class);
 
     private final CompanyRepository companyRepository;
     private final DepartmentRepository departmentRepository;
@@ -50,17 +53,10 @@ public class CompanyService {
     }
 
     public CompanyResponseDTO createCompany(CreateCompanyRequestDTO requestDTO) {
-        if (requestDTO.cnpj() == null || requestDTO.cnpj().isEmpty()) {
-            throw new IllegalArgumentException("CNPJ não pode ser nulo ou vazio");
-        }
-
-        // Validação do formato do CNPJ
-        if (!isValidCnpj(requestDTO.cnpj())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CNPJ inválido");
-        }
+        validateCnpj(requestDTO.cnpj());
 
         String hashedCnpj = CryptoUtil.hash(requestDTO.cnpj());
-        if (companyRepository.existsByHashedCnpj(hashedCnpj)) {
+        if (companyRepository.findByHashedCnpj(hashedCnpj).isPresent()) {
             throw new CnpjAlreadyExistsException("CNPJ já cadastrado: " + requestDTO.cnpj());
         }
 
@@ -88,62 +84,26 @@ public class CompanyService {
     }
 
     public CompanyResponseDTO getCompanyResponseDTO(Long id) {
-        Company company = findById(id);
-        return CompanyResponseDTO.fromEntity(company);
+        return CompanyResponseDTO.fromEntity(findById(id));
     }
 
-    @Cacheable("cnpjCache")
     public CompanyResponseDTO findByCnpj(String cnpj) {
-        // Validação do formato do CNPJ
-        if (!isValidCnpj(cnpj)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CNPJ inválido");
-        }
+        validateCnpj(cnpj);
 
         String hashedCnpj = CryptoUtil.hash(cnpj);
         Optional<Company> companyOptional = companyRepository.findByHashedCnpj(hashedCnpj);
 
         if (companyOptional.isPresent()) {
-            // Empresa encontrada no banco de dados
+            logger.info("Empresa encontrada no banco de dados para CNPJ: {}", cnpj);
             return CompanyResponseDTO.fromEntity(companyOptional.get());
         } else {
-            // Empresa não encontrada, verificar CNPJ na API externa
-            try {
-                String url = BRASIL_API_URL + cnpj;
-                ResponseEntity<ExternalCnpjResponse> response = restTemplate.getForEntity(url, ExternalCnpjResponse.class);
-
-                if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                    // CNPJ existe na Receita Federal
-                    ExternalCnpjResponse externalData = response.getBody();
-
-                    // Criar CompanyResponseDTO usando o construtor do record
-                    return new CompanyResponseDTO(
-                            null, // id é null, pois a empresa não está no banco de dados
-                            externalData.fantasia(), // name
-                            cnpj, // cnpj
-                            formatAddress(externalData), // address
-                            externalData.telefone(), // phone
-                            null // createdAt é null, pois não temos essa informação
-                    );
-                } else {
-                    // CNPJ não encontrado na API externa
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "CNPJ não encontrado na Receita Federal");
-                }
-            } catch (HttpClientErrorException e) {
-                if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "CNPJ não encontrado na Receita Federal");
-                } else {
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao verificar CNPJ");
-                }
-            } catch (Exception e) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao verificar CNPJ");
-            }
+            logger.info("Empresa não encontrada no banco, verificando API externa para CNPJ: {}", cnpj);
+            return checkExternalCnpj(cnpj);
         }
     }
 
-
     public CompanyResponseDTO updateCompany(Long id, UpdateComapnyRequestDTO requestDTO) {
-        Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, companyNotFound));
+        Company company = findById(id);
 
         company.setName(requestDTO.name());
         company.setRawAddress(requestDTO.address());
@@ -155,11 +115,8 @@ public class CompanyService {
     }
 
     public CompanyResponseDTO deleteCompany(Long id) {
-        Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, companyNotFound));
-
+        Company company = findById(id);
         companyRepository.deleteById(company.getId());
-
         return CompanyResponseDTO.fromEntity(company);
     }
 
@@ -177,10 +134,34 @@ public class CompanyService {
         return userPage.map(UserResponseDTO::fromEntity);
     }
 
-    // Método utilitário para validar o formato do CNPJ
-    private boolean isValidCnpj(String cnpj) {
-        // Implementação simplificada: verifica se tem 14 dígitos numéricos
-        return cnpj != null && cnpj.matches("\\d{14}");
+    // Método utilitário para verificar o CNPJ na API externa
+    private CompanyResponseDTO checkExternalCnpj(String cnpj) {
+        try {
+            String url = BRASIL_API_URL + cnpj;
+            ResponseEntity<ExternalCnpjResponse> response = restTemplate.getForEntity(url, ExternalCnpjResponse.class);
+
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                ExternalCnpjResponse externalData = response.getBody();
+                return new CompanyResponseDTO(
+                        null,
+                        externalData.fantasia(),
+                        cnpj,
+                        formatAddress(externalData),
+                        externalData.telefone(),
+                        null
+                );
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "CNPJ não encontrado na Receita Federal");
+            }
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "CNPJ não encontrado na Receita Federal");
+            } else {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao verificar CNPJ");
+            }
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao verificar CNPJ");
+        }
     }
 
     // Método utilitário para formatar o endereço
@@ -204,5 +185,11 @@ public class CompanyService {
                 .append(data.cep());
 
         return address.toString();
+    }
+
+    private void validateCnpj(String cnpj) {
+        if (cnpj == null || !cnpj.matches("\\d{14}")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CNPJ inválido");
+        }
     }
 }
