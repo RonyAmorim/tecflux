@@ -14,6 +14,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = {"password","email","phone"})
+@ToString(exclude = {"password","email","phone","company","department","roles"})
 public class User implements UserDetails {
 
     @Id
@@ -60,6 +61,12 @@ public class User implements UserDetails {
 
     @Column(name="last_login")
     private Instant lastLogin;
+
+    @Column(name="password_reset_token")
+    private String passwordResetToken;
+
+    @Column(name="password_rest_expiry")
+    private LocalDateTime passwordRestExpiry;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(

@@ -10,12 +10,16 @@ import com.tecflux.util.EmailUtil;
 import com.tecflux.util.PasswordGeneratorUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -240,6 +244,77 @@ public class UserService {
         }
         User user = optionalUser.get();
         user.setLastLogin(Instant.now());
+        userRepository.save(user);
+    }
+
+    /**
+     * Método para solicitar a redefinição de senha.
+     *
+     * @param requestDTO DTO contendo o email do usuário.
+     */
+    public void forgotPassword(ForgotPasswordRequestDTO requestDTO) {
+        Optional<User> optionalUser = findByEmail(requestDTO.email());
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+
+            // Gerar token único
+            String token = UUID.randomUUID().toString();
+
+            // Definir a validade do token (por exemplo, 1 hora a partir de agora)
+            LocalDateTime expiryDate = LocalDateTime.now().plusHours(1);
+
+            // Salvar o token e a data de expiração no usuário
+            user.setPasswordResetToken(token);
+            user.setPasswordRestExpiry(expiryDate);
+            userRepository.save(user);
+
+            // Gerar o link de redefinição de senha
+            String resetPasswordLink = "http://localhost:4200/reset-password?token=" + token;
+
+            // Enviar o email de redefinição de senha
+            emailUtil.sendPasswordResetEmail(
+                    user.getRawEmail(),
+                    user.getName(),
+                    resetPasswordLink
+            );
+        }
+
+        // Para segurança, sempre retorne uma resposta genérica
+        // mesmo se o usuário não existir, evitando exposição de informações
+    }
+
+    /**
+     * Método para redefinir a senha com base no token.
+     *
+     * @param requestDTO DTO contendo o token e a nova senha.
+     * @return Mensagem de sucesso.
+     */
+    public void resetPassword(ResetPasswordRequestDTO requestDTO) {
+        String token = requestDTO.token();
+        String newPassword = requestDTO.newPassword();
+
+        // Buscar usuário pelo token
+        Optional<User> optionalUser = userRepository.findByPasswordResetToken(token);
+
+        if (optionalUser.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token inválido.");
+        }
+
+        User user = optionalUser.get();
+
+        // Verificar se o token não expirou
+        if (user.getPasswordRestExpiry().isBefore(LocalDateTime.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token expirado.");
+        }
+
+        // Atualizar a senha
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        // Limpar o token e a data de expiração
+        user.setPasswordResetToken(null);
+        user.setPasswordRestExpiry(null);
+
         userRepository.save(user);
     }
 

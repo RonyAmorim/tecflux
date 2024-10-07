@@ -85,4 +85,43 @@ public class EmailUtil {
             throw new RuntimeException("Falha ao enviar email de boas-vindas", e);
         }
     }
+
+    /**
+     * Envia um email de redefinição de senha.
+     *
+     * @param to             Destinatário do email.
+     * @param nome           Nome do usuário.
+     * @param resetPasswordLink Link para redefinição de senha.
+     */
+    @Async
+    public void sendPasswordResetEmail(String to, String nome, String resetPasswordLink) {
+        Context context = new Context();
+        context.setVariable("nome", nome);
+        context.setVariable("resetPasswordLink", resetPasswordLink);
+
+        String htmlContent = templateEngine.process("Redefinir_Senha", context);
+
+        sendHtmlEmail(to, "Redefinição de Senha - Tecflux", htmlContent);
+    }
+
+    /**
+     * Método genérico para enviar emails HTML.
+     *
+     * @param to      Destinatário do email.
+     * @param subject Assunto do email.
+     * @param html    Conteúdo HTML do email.
+     */
+    private void sendHtmlEmail(String to, String subject, String html) {
+        try {
+            MimeMessageHelper message = new MimeMessageHelper(mailSender.createMimeMessage(), true);
+            message.setFrom("noreply.tecflux@gmail.com");
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(html, true);
+            mailSender.send(message.getMimeMessage());
+        } catch (Exception e) {
+            // Trate exceções de envio de email conforme necessário
+            e.printStackTrace();
+        }
+    }
 }

@@ -20,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findByDepartmentId(Long departmentId, Pageable pageable);
 
     Page<User> findByRolesName(String roleName, Pageable pageable);
+
+    Optional<User> findByPasswordResetToken(String token);
 }
