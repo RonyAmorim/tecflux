@@ -1,9 +1,13 @@
 package com.tecflux.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -19,15 +23,19 @@ public class Ticket {
     @Column(name = "ticket_id")
     private Long id;
 
+    @NotBlank(message = "O título é obrigatório")
+    @Size(max = 150, message = "O título não pode ter mais de 150 caracteres")
     @Column(name = "title", nullable = false, length = 150)
     private String title;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
@@ -40,7 +48,7 @@ public class Ticket {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY )
-    @JoinColumn(name = "user_assigned_id", nullable = false)
+    @JoinColumn(name = "user_assigned_id")
     private User userAssigned;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -50,17 +58,4 @@ public class Ticket {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id", nullable = false)
     private Status status;
-
-
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 }
