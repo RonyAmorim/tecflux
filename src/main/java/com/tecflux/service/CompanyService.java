@@ -1,13 +1,11 @@
 package com.tecflux.service;
 
-import com.tecflux.dto.company.CompanyResponseDTO;
-import com.tecflux.dto.company.CreateCompanyRequestDTO;
-import com.tecflux.dto.company.ExternalCnpjResponse;
-import com.tecflux.dto.company.UpdateComapnyRequestDTO;
+import com.tecflux.dto.company.*;
 import com.tecflux.dto.department.DepartmentResponseDTO;
 import com.tecflux.dto.user.UserResponseDTO;
 import com.tecflux.entity.Company;
 import com.tecflux.entity.Department;
+import com.tecflux.entity.Role;
 import com.tecflux.entity.User;
 import com.tecflux.exception.CnpjAlreadyExistsException;
 import com.tecflux.repository.CompanyRepository;
@@ -22,12 +20,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class CompanyService {
@@ -35,9 +35,11 @@ public class CompanyService {
     private static final Logger logger = LoggerFactory.getLogger(CompanyService.class);
 
     private final CompanyRepository companyRepository;
+    private final PasswordEncoder passwordEncoder;
     private final DepartmentRepository departmentRepository;
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
+    private final RoleService roleService;
     private static final String BRASIL_API_URL = System.getenv("BRASIL_API_URL");
 
     private static final String companyNotFound = "Empresa não encontrada.";
@@ -45,14 +47,18 @@ public class CompanyService {
     public CompanyService(CompanyRepository companyRepository,
                           DepartmentRepository departmentRepository,
                           UserRepository userRepository,
-                          RestTemplate restTemplate) {
+                          RestTemplate restTemplate,
+                          PasswordEncoder passwordEncoder,
+                          RoleService roleService) {
         this.companyRepository = companyRepository;
         this.departmentRepository = departmentRepository;
         this.userRepository = userRepository;
         this.restTemplate = restTemplate;
+        this.passwordEncoder = passwordEncoder;
+        this.roleService = roleService;
     }
 
-    public CompanyResponseDTO createCompany(CreateCompanyRequestDTO requestDTO) {
+    public CompanyResponseDTO createCompany(CreateCompanyWithDepartmentAndUserRequestDTO requestDTO) {
         validateCnpj(requestDTO.cnpj());
 
         String hashedCnpj = CryptoUtil.hash(requestDTO.cnpj());
@@ -61,13 +67,35 @@ public class CompanyService {
         }
 
         Company company = new Company();
-        company.setName(requestDTO.name());
+        company.setName(requestDTO.companyName());
         company.setRawCnpj(requestDTO.cnpj());
         company.setHashedCnpj(hashedCnpj);
         company.setRawAddress(requestDTO.address());
         company.setRawPhone(requestDTO.phone());
-
         companyRepository.save(company);
+
+        Department department = new Department();
+        department.setName("Geral");
+        department.setDescription("Departamento geral da empresa");
+        department.setCompany(company);
+        departmentRepository.save(department);
+
+        String emailHash = CryptoUtil.hash(requestDTO.userEmail());
+        Role masterRole = roleService.findByName("ROLE_MASTER")
+                .orElseThrow(() -> new IllegalArgumentException("Role 'ROLE_MASTER' não encontrada"));
+
+        User user =  new User();
+        user.setName(requestDTO.userName());
+        user.setRawEmail(requestDTO.userEmail());
+        user.setEmailHash(emailHash);
+        user.setPassword(passwordEncoder.encode(requestDTO.userPassword()));
+        user.setPhone(requestDTO.userPhone());
+        user.setPosition(requestDTO.userPosition());
+        user.setCompany(company);
+        user.setDepartment(department);
+        user.setRoles(Set.of(masterRole));
+        userRepository.save(user);
+
 
         return CompanyResponseDTO.fromEntity(company);
     }

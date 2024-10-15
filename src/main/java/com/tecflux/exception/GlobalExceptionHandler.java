@@ -24,10 +24,4 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleCnpjAlreadyExistsException(CnpjAlreadyExistsException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse> handleException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse("Erro interno no servidor"));
-    }
 }
