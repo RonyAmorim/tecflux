@@ -1,21 +1,19 @@
 package com.tecflux.controller;
 
-import com.tecflux.dto.ApiResponse;
 import com.tecflux.dto.ticket.CreateTicketRequestDTO;
 import com.tecflux.dto.ticket.TicketResponseDTO;
 import com.tecflux.dto.ticket.UpdateTicketRequestDTO;
 import com.tecflux.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
-@RequestMapping("/tickets")
+@RequestMapping("/api/tickets")
 public class TicketController {
 
     private final TicketService ticketService;
@@ -26,64 +24,98 @@ public class TicketController {
     }
 
     /**
-     * Endpoint para criar um novo ticket.
+     * Cria um novo ticket.
      *
-     * @param requestDTO DTO contendo os dados para criação do ticket.
-     * @return DTO do ticket criado com status 201.
+     * @param requestDTO Dados para criação do ticket.
+     * @return DTO do ticket criado.
      */
     @PostMapping
-    public ResponseEntity<TicketResponseDTO> createTicket(@Valid @RequestBody CreateTicketRequestDTO requestDTO) {
-        TicketResponseDTO responseDTO = ticketService.createTicket(requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+    @ResponseStatus(HttpStatus.CREATED)
+    public TicketResponseDTO createTicket(@RequestBody CreateTicketRequestDTO requestDTO) {
+        return ticketService.createTicket(requestDTO);
     }
 
     /**
-     * Endpoint para obter um ticket por seu ID.
+     * Busca tickets com base nos filtros fornecidos.
      *
-     * @param id ID do ticket.
-     * @return DTO do ticket com status 200.
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<TicketResponseDTO> getTicketById(@PathVariable Long id) {
-        TicketResponseDTO responseDTO = ticketService.getTicketById(id);
-        return ResponseEntity.ok(responseDTO);
-    }
-
-    /**
-     * Endpoint para listar todos os tickets com paginação.
-     *
-     * @param pageable Informações de paginação.
-     * @return Página de DTOs de tickets com status 200.
+     * @param createdAtStart Data de criação inicial.
+     * @param createdAtEnd   Data de criação final.
+     * @param categoryId     ID da categoria.
+     * @param userId         ID do usuário que criou o ticket.
+     * @param userAssignedId ID do usuário atribuído.
+     * @param priorityId     ID da prioridade.
+     * @param statusId       ID do status.
+     * @param dueDateStart   Data de vencimento inicial.
+     * @param dueDateEnd     Data de vencimento final.
+     * @return Lista de DTOs dos tickets que correspondem aos filtros.
      */
     @GetMapping
-    public ResponseEntity<Page<TicketResponseDTO>> listTickets(Pageable pageable) {
-        Page<TicketResponseDTO> tickets = ticketService.listTickets(pageable);
-        return ResponseEntity.ok(tickets);
+    public List<TicketResponseDTO> getTickets(
+            @RequestParam(value = "createdAtStart", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdAtStart,
+
+            @RequestParam(value = "createdAtEnd", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdAtEnd,
+
+            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "userId", required = false) Long userId,
+            @RequestParam(value = "userAssignedId", required = false) Long userAssignedId,
+            @RequestParam(value = "priorityId", required = false) Long priorityId,
+            @RequestParam(value = "statusId", required = false) Long statusId,
+
+            @RequestParam(value = "dueDateStart", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dueDateStart,
+
+            @RequestParam(value = "dueDateEnd", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dueDateEnd
+    ) {
+        return ticketService.getTickets(
+                createdAtStart,
+                createdAtEnd,
+                categoryId,
+                userId,
+                userAssignedId,
+                priorityId,
+                statusId,
+                dueDateStart,
+                dueDateEnd
+        );
     }
 
     /**
-     * Endpoint para atualizar um ticket existente.
+     * Busca um ticket pelo ID.
      *
-     * @param id         ID do ticket a ser atualizado.
-     * @param requestDTO DTO contendo os dados para atualização.
-     * @return DTO do ticket atualizado com status 200.
+     * @param id ID do ticket.
+     * @return DTO do ticket encontrado.
+     */
+    @GetMapping("/{id}")
+    public TicketResponseDTO getTicketById(@PathVariable Long id) {
+        return ticketService.getTicketById(id);
+    }
+
+    /**
+     * Atualiza um ticket existente.
+     *
+     * @param id        ID do ticket a ser atualizado.
+     * @param requestDTO Dados para atualização.
+     * @return DTO do ticket atualizado.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<TicketResponseDTO> updateTicket(@PathVariable Long id,
-                                                          @Valid @RequestBody UpdateTicketRequestDTO requestDTO) {
-        TicketResponseDTO responseDTO = ticketService.updateTicket(id, requestDTO);
-        return ResponseEntity.ok(responseDTO);
+    public TicketResponseDTO updateTicket(
+            @PathVariable Long id,
+            @RequestBody UpdateTicketRequestDTO requestDTO
+    ) {
+        return ticketService.updateTicket(id, requestDTO);
     }
 
     /**
-     * Endpoint para deletar um ticket por seu ID.
+     * Deleta um ticket pelo ID.
      *
      * @param id ID do ticket a ser deletado.
-     * @return Resposta sem conteúdo com status 204.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTicket(@PathVariable Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTicket(@PathVariable Long id) {
         ticketService.deleteTicket(id);
-        return ResponseEntity.noContent().build();
     }
 }

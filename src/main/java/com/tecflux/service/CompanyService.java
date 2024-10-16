@@ -2,6 +2,7 @@ package com.tecflux.service;
 
 import com.tecflux.dto.company.*;
 import com.tecflux.dto.department.DepartmentResponseDTO;
+import com.tecflux.dto.user.CreateUserRequestDTO;
 import com.tecflux.dto.user.UserResponseDTO;
 import com.tecflux.entity.Company;
 import com.tecflux.entity.Department;
@@ -28,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class CompanyService {
@@ -81,21 +83,24 @@ public class CompanyService {
         departmentRepository.save(department);
 
         String emailHash = CryptoUtil.hash(requestDTO.userEmail());
-        Role masterRole = roleService.findByName("ROLE_MASTER")
-                .orElseThrow(() -> new IllegalArgumentException("Role 'ROLE_MASTER' não encontrada"));
 
-        User user =  new User();
+        User user = new User();
         user.setName(requestDTO.userName());
         user.setRawEmail(requestDTO.userEmail());
         user.setEmailHash(emailHash);
+
         user.setPassword(passwordEncoder.encode(requestDTO.userPassword()));
-        user.setPhone(requestDTO.userPhone());
+
+        user.setRawPhone(requestDTO.userPhone());
         user.setPosition(requestDTO.userPosition());
         user.setCompany(company);
         user.setDepartment(department);
-        user.setRoles(Set.of(masterRole));
-        userRepository.save(user);
+        user.setRoles(requestDTO.roles().stream()
+                .map(roleName -> roleService.findByName(roleName)
+                        .orElseThrow(() -> new IllegalArgumentException("Role " + roleName + " não encontrada")))
+                .collect(Collectors.toSet()));
 
+        userRepository.save(user);
 
         return CompanyResponseDTO.fromEntity(company);
     }

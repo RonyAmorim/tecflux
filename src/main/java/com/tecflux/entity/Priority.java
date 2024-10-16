@@ -45,10 +45,10 @@ public class Priority {
     }
 
     public enum Levels {
-        CRITICO(1L, "CRITICO", "Situações que exigem atenção imediata e extrema."),
-        ALTA(3L, "ALTA", "Situações que precisam ser resolvidas rapidamente."),
-        MEDIA(5L, "MEDIA", "Situações que podem aguardar um pouco mais."),
-        BAIXA(7L, "BAIXA", "Situações de menor importância.");
+        CRITICO(1L, "URGENTE", "Situações que exigem atenção imediata e extrema."),
+        ALTA(2L, "ALTA", "Situações que precisam ser resolvidas rapidamente."),
+        MEDIA(3L, "MEDIA", "Situações que podem aguardar um pouco mais."),
+        BAIXA(4L, "BAIXA", "Situações de menor importância.");
 
         private final Long id;
         private final String level;

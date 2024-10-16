@@ -1,5 +1,7 @@
 package com.tecflux.dto.company;
 
+import java.util.Set;
+
 public record CreateCompanyWithDepartmentAndUserRequestDTO(
         String cnpj,
         String companyName,
@@ -9,6 +11,7 @@ public record CreateCompanyWithDepartmentAndUserRequestDTO(
         String userEmail,
         String userPhone,
         String userPosition,
-        String userPassword
+        String userPassword,
+        Set<String> roles
 ) {
 }

@@ -39,6 +39,9 @@ public class Ticket {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "due_date")
+    private LocalDateTime dueDate;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
@@ -58,4 +61,8 @@ public class Ticket {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id", nullable = false)
     private Status status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
 }
