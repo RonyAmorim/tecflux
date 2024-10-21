@@ -6,6 +6,7 @@ import com.tecflux.dto.ticket.UpdateTicketRequestDTO;
 import com.tecflux.entity.*;
 import com.tecflux.repository.*;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 
 @Service
 public class TicketService {
@@ -131,7 +133,9 @@ public class TicketService {
             Long priorityId,
             Long statusId,
             LocalDateTime dueDateStart,
-            LocalDateTime dueDateEnd
+            LocalDateTime dueDateEnd,
+            Long departmentId,
+            String title
     ) {
         Specification<Ticket> spec = Specification.where(null);
 
@@ -161,9 +165,25 @@ public class TicketService {
 
         if (dueDateStart != null && dueDateEnd != null) {
             spec = spec.and(dueDateBetween(dueDateStart, dueDateEnd));
+
+
         }
 
-        List<Ticket> tickets = ticketRepository.findAll(spec);
+        if (departmentId != null) {
+            spec = spec.and(departmentIs(departmentId));
+        }
+
+        // Adicionando filtro pelo título
+        if (title != null && !title.trim().isEmpty()) {
+            spec = spec.and(titleContains(title));
+        }
+
+        // Definindo a ordenação pelos tickets mais recentemente atualizados
+        Sort sort = Sort.by(Sort.Direction.DESC, "updatedAt");
+
+        // Buscando os tickets com os filtros e ordenação aplicados
+        List<Ticket> tickets = ticketRepository.findAll(spec, sort);
+
 
         return tickets.stream()
                 .map(TicketResponseDTO::fromEntity)
@@ -224,6 +244,25 @@ public class TicketService {
     private Specification<Ticket> dueDateBetween(LocalDateTime start, LocalDateTime end) {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.between(root.get("dueDate"), start, end);
+    }
+
+    /**
+     * Especificação para filtrar tickets pelo departamento.
+     */
+    private Specification<Ticket> departmentIs(Long departmentId) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("department").get("id"), departmentId);
+    }
+
+    /**
+     * Especificação para filtrar tickets cujo título contém a string fornecida.
+     */
+    private Specification<Ticket> titleContains(String title) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("title")),
+                        "%" + title.toLowerCase() + "%"
+                );
     }
 
     /**

@@ -9,6 +9,8 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +29,8 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(of = "id")
 @ToString(exclude = {"password","email","phone","company","department","roles"})
 public class User implements UserDetails {
+
+    private static final Logger logger = LoggerFactory.getLogger(User.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -105,8 +109,13 @@ public class User implements UserDetails {
 
     @PostLoad
     public void postLoad() {
-        this.rawEmail = CryptoUtil.decrypt(this.email);
-        this.rawPhone = CryptoUtil.decrypt(this.phone);
+        try{
+            this.rawEmail = CryptoUtil.decrypt(this.email);
+            this.rawPhone = CryptoUtil.decrypt(this.phone);
+        } catch (Exception e) {
+            logger.error("Erro ao descriptografar email ou telefone", e);
+            throw new RuntimeException("Erro ao descriptografar email ou telefone", e);
+        }
     }
 
     // Implementações da interface UserDetails

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/tickets")
+@RequestMapping("/tickets")
 public class TicketController {
 
     private final TicketService ticketService;
@@ -47,6 +47,10 @@ public class TicketController {
      * @param statusId       ID do status.
      * @param dueDateStart   Data de vencimento inicial.
      * @param dueDateEnd     Data de vencimento final.
+     * @param departmentId   ID do departamento (novo filtro).
+     * @param title          Título do ticket (novo filtro).
+     * @param page           Número da página para paginação (opcional).
+     * @param size           Tamanho da página para paginação (opcional).
      * @return Lista de DTOs dos tickets que correspondem aos filtros.
      */
     @GetMapping
@@ -67,7 +71,15 @@ public class TicketController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dueDateStart,
 
             @RequestParam(value = "dueDateEnd", required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dueDateEnd
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dueDateEnd,
+
+            // Novos parâmetros adicionados
+            @RequestParam(value = "departmentId", required = false) Long departmentId,
+            @RequestParam(value = "title", required = false) String title,
+
+            // Parâmetros de paginação (opcional)
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size
     ) {
         return ticketService.getTickets(
                 createdAtStart,
@@ -78,7 +90,9 @@ public class TicketController {
                 priorityId,
                 statusId,
                 dueDateStart,
-                dueDateEnd
+                dueDateEnd,
+                departmentId,
+                title
         );
     }
 

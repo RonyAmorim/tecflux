@@ -1,4 +1,4 @@
-package com.tecflux.dto;
+package com.tecflux.dto.ticket;
 
 import com.tecflux.dto.ticket.TicketResponseDTO;
 import lombok.AllArgsConstructor;

@@ -27,5 +27,9 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecif
     // Buscar tickets por status
     Page<Ticket> findByStatusId(Long statusId, Pageable pageable);
 
-    // Outros métodos personalizados conforme necessário
+    // Buscar tickets por título
+    Page<Ticket> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+
+    // Buscar tickets por departamento
+    Page<Ticket> findByDepartmentId(Long departmentId, Pageable pageable);
 }
