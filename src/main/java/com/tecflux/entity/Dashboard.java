@@ -16,18 +16,8 @@ import lombok.ToString;
 @ToString
 public class Dashboard {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "dashboard_id")
-    private Long id;
-
-    @Column(name = "total_abertos", nullable = false)
     private Long totalAbertos;
-
-    @Column(name = "total_em_progresso", nullable = false)
     private Long totalEmProgresso;
-
-    @Column(name = "total_concluidos", nullable = false)
     private Long totalConcluidos;
 
     // Construtor personalizado para definir as contagens

@@ -17,12 +17,20 @@ public class DashboardService {
         return dashboardRepository.obterResumoChamados();
     }
 
+    public Dashboard obterResumoChamadosPorEmpresa(Long empresaId) {
+        return dashboardRepository.obterResumoChamadosPorEmpresa(empresaId);
+    }
+
     public void exibirResumoChamados() {
         Dashboard resumo = obterResumoChamados();
 
         System.out.println("Chamados abertos: " + resumo.getTotalAbertos());
         System.out.println("Chamados em progresso: " + resumo.getTotalEmProgresso());
         System.out.println("Chamados concluídos: " + resumo.getTotalConcluidos());
+    }
+
+    public List<Object[]> obterChamadosPorUsuario() {
+        return dashboardRepository.obterChamadosPorUsuario();
     }
 }
 

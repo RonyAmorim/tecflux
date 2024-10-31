@@ -13,8 +13,13 @@ public class DashboardController {
     @Autowired
     private DashboardService dashboardService;
 
-    @GetMapping("/dashboard")
-    public Dashboard getDashboard() {
-        return dashboardService.obterResumoChamados();
+    @GetMapping("/dashboard/{empresaId}")
+    public Dashboard getDashboardPorEmpresa(@PathVariable Long empresaId) {
+        return dashboardService.obterResumoChamadosPorEmpresa(empresaId);
+    }
+
+    @GetMapping("/dashboard/chamados-por-usuario")
+    public List<Object[]> getChamadosPorUsuario() {
+    return dashboardService.obterChamadosPorUsuario();
     }
 }
