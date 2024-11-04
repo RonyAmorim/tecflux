@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import com.tecflux.repository.DashboardRepository;
 import com.tecflux.entity.Dashboard;
+import java.util.List;
 
 @Repository
 public interface DashboardRepository extends JpaRepository<Dashboard, Long> {
