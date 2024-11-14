@@ -270,7 +270,7 @@ public class UserService {
             userRepository.save(user);
 
             // Gerar o link de redefinição de senha
-            String resetPasswordLink = "http://localhost:4200/reset-password?token=" + token;
+            String resetPasswordLink = "http://localhost:4200/newpassword?token=" + token;
 
             // Enviar o email de redefinição de senha
             emailUtil.sendPasswordResetEmail(
